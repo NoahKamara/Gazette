@@ -1,0 +1,15 @@
+--binarygrouping none 
+--commas inline
+--decimalgrouping none
+--hexgrouping none
+--ifdef outdent
+--indent tab
+--nospaceoperators *,/
+--octalgrouping none
+--operatorfunc no-space
+--patternlet inline
+--self insert
+--stripunusedargs unnamed-only
+--trimwhitespace nonblank-lines
+--wrapcollections before-first
+--wrapparameters before-first

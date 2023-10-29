@@ -1,13 +1,13 @@
 //
-//  File.swift
-//  
+//  PreviewDataModifier.swift
+//
 //
 //  Created by Noah Kamara on 16.10.23.
 //
 
-import SwiftUI
-import SwiftData
 import GazetteDB
+import SwiftData
+import SwiftUI
 
 struct PreviewDataModifier: ViewModifier {
 	@Environment(\.modelContext)
@@ -19,7 +19,7 @@ struct PreviewDataModifier: ViewModifier {
 		content
 			.task(id: "preview-data", priority: .userInitiated) {
 				let persistence = Persistence(modelContainer: context.container)
-				await onSetup(persistence)
+				await self.onSetup(persistence)
 				try? await persistence.save()
 			}
 	}

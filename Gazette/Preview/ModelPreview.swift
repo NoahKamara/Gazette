@@ -1,14 +1,14 @@
 //
-//  File.swift
-//  
+//  ModelPreview.swift
+//
 //
 //  Created by Noah Kamara on 16.10.23.
 //
 
-import SwiftData
-import SwiftUI
 import GazetteDB
 import GazetteParsing
+import SwiftData
+import SwiftUI
 
 public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 	public typealias OnSetupFn = (Persistence) async throws -> Void
@@ -18,8 +18,7 @@ public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 	
 	public init(
 		onSetup: @escaping OnSetupFn,
-		@ViewBuilder
-		content: @escaping (Model) -> Content
+		@ViewBuilder content: @escaping (Model) -> Content
 	) {
 		self.content = content
 		self.onSetup = onSetup
@@ -27,15 +26,14 @@ public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 	
 	public init(
 		rss feed: PreviewFeeds,
-		@ViewBuilder
-		content: @escaping (Model) -> Content
+		@ViewBuilder content: @escaping (Model) -> Content
 	) {
 		self.init(rss: [feed], content: content)
 	}
+
 	public init(
 		rss feeds: Set<PreviewFeeds> = .all,
-		@ViewBuilder
-		content: @escaping (Model) -> Content
+		@ViewBuilder content: @escaping (Model) -> Content
 	) {
 		self.init(onSetup: { persistence in
 			for feed in feeds {
@@ -52,8 +50,7 @@ public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 	struct ContentView: View {
 		public init(
 			onSetup: @escaping OnSetupFn,
-			@ViewBuilder
-			content: @escaping (Model) -> Content
+			@ViewBuilder content: @escaping (Model) -> Content
 		) {
 			self.content = content
 			self.onSetup = onSetup
@@ -69,7 +66,7 @@ public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 		
 		var body: some View {
 			if let model = models.first {
-				content(model)
+				self.content(model)
 			} else {
 				ContentUnavailableView {
 					Label {
@@ -78,16 +75,15 @@ public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 						Image(systemName: "xmark")
 					}
 				}
-				.opacity(waitedToShowIssue ? 1 : 0)
+				.opacity(self.waitedToShowIssue ? 1 : 0)
 				.task {
 					try? await Task.sleep(for: .seconds(1))
-					waitedToShowIssue = true
-					
+					self.waitedToShowIssue = true
 				}
 				.task {
 					let persistence = Persistence(modelContainer: context.container)
 					do {
-						try await onSetup(persistence)
+						try await self.onSetup(persistence)
 					} catch {
 						print("Error during Setup", error)
 					}
@@ -97,7 +93,7 @@ public struct ModelPreview<Model: PersistentModel, Content: View>: View {
 	}
 	
 	public var body: some View {
-		ContentView(onSetup: onSetup, content: content)
+		ContentView(onSetup: self.onSetup, content: self.content)
 			.persistence(inMemory: true)
 	}
 }

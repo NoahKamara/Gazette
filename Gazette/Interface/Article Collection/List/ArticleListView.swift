@@ -5,9 +5,9 @@
 //  Created by Noah Kamara on 17.10.23.
 //
 
-import SwiftUI
 import GazetteDB
 import SwiftData
+import SwiftUI
 
 struct ArticleListView: View {
 	var query: Articles
@@ -15,17 +15,17 @@ struct ArticleListView: View {
 	@Binding
 	var selection: PersistentIdentifier?
 	
-    var body: some View {
-		LazyVStack(spacing: 0) {
-			ForEach(query.articles) { article in
+	var body: some View {
+		List {
+			ForEach(self.query.articles) { article in
 				NavigationLink(value: article) {
 					Row(article: article)
 				}
 				.buttonStyle(.plain)
 				.safeAreaPadding(.horizontal, 15)
-				.padding(.vertical, 10)
+				.padding(.vertical, 5)
 				.background {
-					if selection == article.id {
+					if self.selection == article.id {
 						ContainerRelativeShape()
 							.fill(Color.accentColor.quaternary)
 					} else {
@@ -35,8 +35,9 @@ struct ArticleListView: View {
 			}
 		}
 		.safeAreaPadding(.bottom, 20)
-    }
+	}
 }
+
 //
 #Preview {
 	ModelPreview(rss: .spon) { feed in
@@ -47,8 +48,8 @@ struct ArticleListView: View {
 	}
 }
 
-
 // MARK: Row
+
 extension ArticleListView {
 	struct Row: View {
 		@Environment(\.articleProps)
@@ -59,7 +60,7 @@ extension ArticleListView {
 		
 		var body: some View {
 			HStack(alignment: .top, spacing: 10) {
-				if config.showsFeed {
+				if self.config.showsFeed {
 					if let feed = article.feed {
 						FeedIcon(feed: feed)
 					} else {
@@ -72,7 +73,7 @@ extension ArticleListView {
 				
 				HStack(alignment: .top) {
 					VStack(alignment: .leading) {
-						Text(article.title ?? "Untitled Article")
+						Text(self.article.title ?? "Untitled Article")
 							.fontWeight(.semibold)
 							.lineLimit(3)
 						
@@ -98,10 +99,10 @@ extension ArticleListView {
 				}
 				.safeAreaInset(edge: .top, spacing: 3, content: {
 					HStack(alignment: .top) {
-						if config.showsFeed, let feed = article.feed {
+						if self.config.showsFeed, let feed = article.feed {
 							Text(feed.title ?? "Untitled Feed")
 								.frame(maxWidth: .infinity, alignment: .leading)
-						}
+						} else { Spacer() }
 						
 						if let date = article.pubDate {
 							if Date.now.timeIntervalSince(date) < 60*60 {
@@ -118,21 +119,25 @@ extension ArticleListView {
 			}
 			.containerShape(RoundedRectangle(cornerRadius: 5))
 			.swipeActions(edge: .trailing, allowsFullSwipe: true) {
-				Button(action: { article.isRead.toggle() }, label: {
+				Button(action: { self.article.isRead.toggle() }, label: {
 					Image(systemName: "circle")
-						.symbolVariant(article.isRead ? .slash : .none)
+						.symbolVariant(self.article.isRead ? .slash : .none)
 				})
 			}
-			.foregroundStyle(!article.isRead ? HierarchicalShapeStyle.primary : .secondary)
+			.contextMenu {
+				ToggleReadArticleButton(self.article)
+				BookmarkArticleButton(self.article)
+				ShareArticleButton(self.article)
+			}
+			.foregroundStyle(!self.article.isRead ? HierarchicalShapeStyle.primary : .secondary)
 		}
 	}
 }
 
-
-//#Preview("Article List") {
+// #Preview("Article List") {
 //	@State var sorting = ArticleSorting()
 //	@State var selection = PersistentIdentifier?.none
-//	
+//
 //	return ModelPreview(rss: .spon) { feed in
 //		ArticleCollectionView(
 //			feed: feed,
@@ -140,5 +145,5 @@ extension ArticleListView {
 //			selection: $selection
 //		)
 //	}
-//}
+// }
 //

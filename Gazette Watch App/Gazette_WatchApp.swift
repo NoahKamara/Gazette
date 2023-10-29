@@ -9,9 +9,9 @@ import SwiftUI
 
 @main
 struct Gazette_Watch_Watch_AppApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
+	var body: some Scene {
+		WindowGroup {
+			ContentView()
+		}
+	}
 }

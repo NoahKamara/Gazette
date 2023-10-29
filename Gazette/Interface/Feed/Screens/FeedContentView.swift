@@ -5,8 +5,9 @@
 //  Created by Noah Kamara on 19.10.23.
 //
 
-import SwiftUI
 import GazetteDB
+import SwiftData
+import SwiftUI
 
 struct ArticleViewProperties {
 	static let `default` = Self(showsFeed: true)
@@ -14,7 +15,7 @@ struct ArticleViewProperties {
 	var showsFeed: Bool
 }
 
-fileprivate struct ArticleViewKey: EnvironmentKey {
+private struct ArticleViewKey: EnvironmentKey {
 	static var defaultValue: ArticleViewProperties = .default
 }
 
@@ -38,49 +39,47 @@ struct FeedContentView: View {
 	@Environment(Navigation.self)
 	var nav
 	
+	private var feedID: PersistentIdentifier {
+		self.feed.persistentModelID
+	}
+	
 	var body: some View {
 		@Bindable var nav = nav
-		ArticleCollectionView(
-			content: .feed(feed),
+		ArticleCollectionView2(
+			predicate: #Predicate<Article> { article in
+				article.feed?.persistentModelID == self.feedID
+			},
 			selection: $nav.article
 		) {
-			if let asset = feed.icon {
+			if let asset = feed.image {
 				AssetViewNew(asset: asset) {
+					let size = PlatformImage(data: asset.data ?? Data())?.size ?? .zero
+					
 					$0
+						.resizable()
 						.scaledToFit()
+						.frame(maxWidth: size.width, maxHeight: size.height)
 				}
-				.aspectRatio(1, contentMode: .fit)
-				.clipShape(RoundedRectangle(cornerRadius: 10))
-				.padding(10)
-				.frame(height: 30)
+				.clipShape(RoundedRectangle(cornerRadius: 5))
+				.frame(height: 60)
+				.padding(.horizontal, 30)
 				.frame(height: 100)
 			}
 		}
 		.environment(\.articleProps.showsFeed, false)
 		.refreshable {
-			print("REFRESH")
-		}
-		.refreshable {
 			print("REFRESH FEED")
 			try? await Task.sleep(for: .seconds(2))
 		}
-		.navigationTitle(feed.title ?? "Untitled Feed")
-#if !os(macOS)
+		.navigationTitle(self.feed.title ?? "Untitled Feed")
 		.toolbar {
 			ToolbarItemGroup(placement: .secondaryAction) {
-				Button(action: {}, label: {
-					Label("Rename", systemImage: "pencil")
-				})
-				
-				Button(action: {}, label: {
-					Label("Style", systemImage: "paintpalette")
-				})
+				EditFeedButton(self.feed)
 			}
-			
+			ToolbarItemGroup(placement: .secondaryAction) {
+				ShareFeedButton(self.feed)
+			}
 		}
-		.navigationBarTitleDisplayMode(.inline)
-#endif
-		
 	}
 }
 

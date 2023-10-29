@@ -6,17 +6,17 @@
 //
 
 import Foundation
-import SwiftUI
 import GazetteDB
+import SwiftUI
 
 public struct ArticleSorting {
 	var descriptors: [SortDescriptor<Article>] {
-		let keyPath = switch mode {
+		let keyPath = switch self.mode {
 		case .published: \Article.pubDate
 		case .read: \Article.pubDate
 		}
 		
-		return [SortDescriptor(keyPath, order: order)]
+		return [SortDescriptor(keyPath, order: self.order)]
 	}
 	
 	enum Mode: String, CaseIterable {
@@ -41,7 +41,7 @@ public struct ArticleSorting {
 			self.mode = mode
 			self.order = .forward
 		} else {
-			order = switch order {
+			self.order = switch self.order {
 			case .forward: .reverse
 			case .reverse: .forward
 			}
@@ -54,16 +54,16 @@ struct SortingMenu: View {
 	var value: ArticleSorting
 	
 	var body: some View {
-		ForEach(ArticleSorting.Mode.allCases, id:\.rawValue) { mode in
-			Button(action: { value.setMode(mode) }, label: {
+		ForEach(ArticleSorting.Mode.allCases, id: \.rawValue) { mode in
+			Button(action: { self.value.setMode(mode) }, label: {
 				Label {
 					Text(mode.label)
 				} icon: {
-					if value.mode == mode {
-						Image(systemName: value.order == .forward ? "arrow.down" : "arrow.up")
+					if self.value.mode == mode {
+						Image(systemName: self.value.order == .forward ? "arrow.down" : "arrow.up")
 							.contentTransition(.symbolEffect(.replace.downUp.byLayer))
-							.sensoryFeedback(.decrease, trigger: value.order == .reverse)
-							.sensoryFeedback(.increase, trigger: value.order == .forward)
+							.sensoryFeedback(.decrease, trigger: self.value.order == .reverse)
+							.sensoryFeedback(.increase, trigger: self.value.order == .forward)
 					}
 				}
 			})
